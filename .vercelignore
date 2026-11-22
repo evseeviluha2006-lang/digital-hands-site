@@ -1,0 +1,14 @@
+# Портфолио HUSH.CORP и исходники — в репозитории, но не в деплое Vercel
+index.html
+assets/
+analiz-sajty-vizitki-kaliningrad.md
+uslugi-digital.md
+
+# Локальные копии статики для VPS (основная статика лежит в public/)
+yookassa_backend/static/
+
+# Служебное
+.git/
+.venv/
+__pycache__/
+*.pyc

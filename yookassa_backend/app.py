@@ -195,6 +195,15 @@ def success():
 """)
 
 
-# Раздача статики: положите uslugi-digital.html как static/index.html
-if os.path.isdir("static"):
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Раздача статики: Vercel использует public/, VPS/Docker — static/.
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for _static_dir in (
+    os.path.join(_BASE_DIR, "public"),
+    "public",
+    os.path.join(_BASE_DIR, "static"),
+    "static",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
+):
+    if os.path.isdir(_static_dir):
+        app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
+        break

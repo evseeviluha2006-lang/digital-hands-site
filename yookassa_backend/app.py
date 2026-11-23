@@ -75,15 +75,7 @@ def _auth_header() -> str:
 
 @app.get("/health")
 def health():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sd = os.path.join(base, "static")
-    return {
-        "ok": True,
-        "configured": bool(SHOP_ID and SECRET_KEY),
-        "static_dir": _STATIC_DIR,
-        "static_exists": os.path.isdir(sd),
-        "static_ls": os.listdir(sd)[:20] if os.path.isdir(sd) else [],
-    }
+    return {"ok": True, "configured": bool(SHOP_ID and SECRET_KEY)}
 
 
 @app.post("/api/pay")

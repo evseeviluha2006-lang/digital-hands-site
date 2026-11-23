@@ -75,7 +75,15 @@ def _auth_header() -> str:
 
 @app.get("/health")
 def health():
-    return {"ok": True, "configured": bool(SHOP_ID and SECRET_KEY)}
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return {
+        "ok": True,
+        "configured": bool(SHOP_ID and SECRET_KEY),
+        "cwd": os.getcwd(),
+        "base": base,
+        "public_exists": os.path.isdir(os.path.join(base, "public")),
+        "public_files": os.listdir(os.path.join(base, "public"))[:10] if os.path.isdir(os.path.join(base, "public")) else [],
+    }
 
 
 @app.post("/api/pay")

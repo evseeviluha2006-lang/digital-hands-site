@@ -1,6 +1,6 @@
 # Портфолио HUSH.CORP и исходники — в репозитории, но не в деплое Vercel
-index.html
-assets/
+/index.html
+/assets/
 analiz-sajty-vizitki-kaliningrad.md
 uslugi-digital.md
 

@@ -75,15 +75,7 @@ def _auth_header() -> str:
 
 @app.get("/health")
 def health():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    return {
-        "ok": True, "configured": bool(SHOP_ID and SECRET_KEY),
-        "cwd": os.getcwd(),
-        "ls_cwd": os.listdir(".")[:30],
-        "ls_base": os.listdir(base)[:30],
-        "static_exists": os.path.isdir(os.path.join(base, "static")),
-        "public_exists": os.path.isdir(os.path.join(base, "public")),
-    }
+    return {"ok": True, "configured": bool(SHOP_ID and SECRET_KEY)}
 
 
 @app.post("/api/pay")
@@ -204,14 +196,34 @@ def success():
 
 
 # Раздача статики: Vercel использует public/, VPS/Docker — static/.
+from fastapi.responses import FileResponse
+
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-for _static_dir in (
-    os.path.join(_BASE_DIR, "public"),
-    "public",
+_STATIC_DIR = None
+for _candidate in (
     os.path.join(_BASE_DIR, "static"),
+    os.path.join(_BASE_DIR, "public"),
     "static",
+    "public",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
 ):
-    if os.path.isdir(_static_dir):
-        app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
+    if os.path.isdir(_candidate):
+        _STATIC_DIR = _candidate
         break
+
+
+@app.get("/{path:path}")
+async def serve_static(path: str):
+    if not _STATIC_DIR:
+        raise HTTPException(404, "Static directory not found")
+    clean = path.strip("/") or "index.html"
+    # prevent path traversal
+    target = os.path.normpath(os.path.join(_STATIC_DIR, clean))
+    if not target.startswith(os.path.normpath(_STATIC_DIR)):
+        raise HTTPException(404)
+    if os.path.isfile(target):
+        return FileResponse(target)
+    index = os.path.join(target, "index.html")
+    if os.path.isfile(index):
+        return FileResponse(index)
+    raise HTTPException(404, f"Not found: {path}")
